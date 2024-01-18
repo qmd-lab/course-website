@@ -104,7 +104,7 @@ async function makeListings(schedulePath: string) {
     }
 
     for (const [type, items] of Object.entries(typeLists)) {
-        const outputPath = join(scheduleDir, `${type}-listing.yml`);
+        const outputPath = join(scheduleDir, `${type}-contents.yml`);
         await Deno.writeTextFile(outputPath, stringify(items));
     }
 }

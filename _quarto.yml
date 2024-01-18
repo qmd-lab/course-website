@@ -1,7 +1,6 @@
 project:
   type: website
-  pre-render: 
-    - assets/prep-website.ts
+  # pre-render: assets/prep-website.ts
 
 website:
   sidebar:
@@ -26,8 +25,8 @@ format:
     theme: [cosmo, assets/styles.scss]
     toc: true
     
-metadata-files: 
-  - assets/quarto-course-website_files/sidebar.yml
+# metadata-files: 
+#   - assets/quarto-course-website_files/sidebar.yml
 
 
 

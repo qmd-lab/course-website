@@ -2,7 +2,8 @@
 listing:
   - id: slides-listing
     contents: 
-      - assets/quarto-class-website_files/slides-listing.yml
+      - assets/quarto-class-website_files/slides-contents.yml
+      # - slides-contents.yml
     sort: "date desc"
     type: grid
     fields: 

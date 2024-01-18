@@ -2,7 +2,8 @@
 listing:
   - id: ps-listing
     contents: 
-      - ps-listing.yml
+      - assets/quarto-class-website_files/ps-contents.yml
+      # - ps-contents.yml
     type: table
     categories: false
 toc: false
