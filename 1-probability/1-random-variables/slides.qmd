@@ -1,0 +1,13 @@
+---
+title: "Random Variables"
+subtitle: "Stat 999"
+format: revealjs
+---
+
+## First Slide
+
+Something
+
+## Second Slide
+
+Another thing.

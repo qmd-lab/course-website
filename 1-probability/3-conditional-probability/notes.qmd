@@ -1,0 +1,11 @@
+---
+title: "Conditional Probability"
+---
+
+Here is some background on conditional probability.
+
+Bayes Rule allows you to invert a conditional probability. It states that
+
+$$
+P(A|B) = \frac{P(B|A) \, P(A)}{P(B)}
+$$

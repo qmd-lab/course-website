@@ -1,0 +1,33 @@
+project:
+  type: website
+  pre-render: 
+    - assets/prep-website.ts
+
+website:
+  sidebar:
+    title: Stat 999
+    style: docked
+    logo: assets/stat_bear.png
+    contents:
+      - href: index.qmd
+        text: Home
+      - href: syllabus.qmd
+        text: Syllabus
+      - href: office-hours.qmd
+        text: Office Hours
+      - href: slides.qmd
+        text: Slides
+      - href: assignments.qmd
+        text: Assignments
+          
+
+format:
+  html:
+    theme: [cosmo, assets/styles.scss]
+    toc: true
+    
+metadata-files: 
+  - assets/quarto-course-website_files/sidebar.yml
+
+
+

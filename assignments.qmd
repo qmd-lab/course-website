@@ -1,0 +1,15 @@
+---
+listing:
+  - id: ps-listing
+    contents: 
+      - ps-listing.yml
+    type: table
+    categories: false
+toc: false
+---
+
+# Assignments
+
+:::{#ps-listing}
+:::
+

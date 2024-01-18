@@ -1,0 +1,11 @@
+---
+title: "The Binomial Distribution"
+---
+
+Here is some background on the binomial distribution.
+
+Let $X$ is distributed as a binomial random variable with parameters $n$ and $p$ if
+
+$$
+P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}
+$$

@@ -1,0 +1,12 @@
+---
+title: "The Binomial Distribution"
+format: revealjs
+---
+
+## First Slide
+
+Something
+
+## Second Slide
+
+Another thing.

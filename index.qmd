@@ -1,0 +1,13 @@
+---
+listing:
+  id: schedule-listing
+  contents: assets/quarto-class-website_files/schedule.yml
+  template: assets/listings/schedule.ejs
+---
+
+This is a Quarto website.
+
+To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+
+:::{#schedule-listing}
+:::

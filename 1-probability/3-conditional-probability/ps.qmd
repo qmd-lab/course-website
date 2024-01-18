@@ -1,0 +1,9 @@
+---
+title: "Conditional Probability"
+subtitle: "some practice"
+format: pdf
+---
+
+### Question 1
+
+What is $E(X)$?

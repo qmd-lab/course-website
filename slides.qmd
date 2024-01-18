@@ -1,0 +1,20 @@
+---
+listing:
+  - id: slides-listing
+    contents: 
+      - assets/quarto-class-website_files/slides-listing.yml
+    sort: "date desc"
+    type: grid
+    fields: 
+      - title
+      - subtitle
+      - image
+    categories: false
+toc: false
+---
+
+# Slides
+
+:::{#slides-listing}
+:::
+
