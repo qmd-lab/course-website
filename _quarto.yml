@@ -10,15 +10,12 @@ website:
         text: Slides
       - href: problem-sets.qmd
         text: Problem Sets
-          
-format:
-  html:
-    theme: [sandstone, assets/styles.scss]
-    toc: true
     
 metadata-files:
   - assets/quarto-course-website_files/sidebar-nav.yml
 #  - sidebar-nav.yml
 
-
-
+format:
+  html:
+    theme: [sandstone, assets/styles.scss]
+    toc: true
