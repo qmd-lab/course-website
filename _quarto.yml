@@ -1,6 +1,6 @@
 project:
   type: website
-  # pre-render: assets/prep-website.ts
+  pre-render: assets/prep-website.ts
 
 website:
   sidebar:
@@ -16,17 +16,18 @@ website:
         text: Office Hours
       - href: slides.qmd
         text: Slides
-      - href: assignments.qmd
-        text: Assignments
+      - href: problem-sets.qmd
+        text: Problem Sets
           
 
 format:
   html:
-    theme: [cosmo, assets/styles.scss]
+    theme: [sandstone, assets/styles.scss]
     toc: true
     
-# metadata-files: 
-#   - assets/quarto-course-website_files/sidebar.yml
+metadata-files:
+  - assets/quarto-course-website_files/sidebar-nav.yml
+#  - sidebar-nav.yml
 
 
 
