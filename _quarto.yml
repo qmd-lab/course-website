@@ -6,7 +6,6 @@ website:
   sidebar:
     title: Stat 999
     style: docked
-    logo: assets/stat_bear.png
     contents:
       - href: index.qmd
         text: Home
