@@ -1,24 +1,16 @@
 project:
   type: website
-  #pre-render: assets/prep-website.ts
 
 website:
   sidebar:
-    title: Stat 999
-    style: docked
     contents:
       - href: index.qmd
         text: Home
-      - href: syllabus.qmd
-        text: Syllabus
-      - href: office-hours.qmd
-        text: Office Hours
       - href: slides.qmd
         text: Slides
       - href: problem-sets.qmd
         text: Problem Sets
           
-
 format:
   html:
     theme: [sandstone, assets/styles.scss]
