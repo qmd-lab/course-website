@@ -112,3 +112,40 @@ async function makeListings(schedulePath: string) {
 console.log("> Making files for listings ...");
 await makeListings(schedulePath);
 
+
+// ----------------------------------- //
+//           Make Sidebar Nav          //
+// ----------------------------------- //
+
+async function createSidebarNav(schedulePath: string) {
+    const yamlContent = await Deno.readTextFile(schedulePath);
+    const schedule = parse(yamlContent) as Array<any>;
+
+    let notesHrefs: string[] = [];
+
+    schedule.forEach(week => {
+        week.days.forEach(day => {
+            day.items.forEach(item => {
+                if (item.type === 'Notes' && item.publish) {
+                    notesHrefs.push(item.href);
+                }
+            });
+        });
+    });
+
+    const sidebarNav = {
+        website: {
+            sidebar: {
+                contents: notesHrefs
+            }
+        }
+    };
+
+    const sidebarNavPath = join(dirname(schedulePath), 'sidebar-nav.yml');
+    await Deno.writeTextFile(sidebarNavPath, stringify(sidebarNav));
+}
+
+await createSidebarNav(schedulePath);
+
+
+
