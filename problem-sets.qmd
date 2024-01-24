@@ -9,7 +9,7 @@ listing:
 toc: false
 ---
 
-# Assignments
+# Problem Sets
 
 :::{#ps-listing}
 :::
