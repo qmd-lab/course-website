@@ -1,6 +1,6 @@
 project:
   type: website
-  pre-render: assets/prep-website.ts
+  #pre-render: assets/prep-website.ts
 
 website:
   sidebar:
