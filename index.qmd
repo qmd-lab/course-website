@@ -1,8 +1,8 @@
 ---
 listing:
   id: schedule-listing
-  contents: assets/quarto-class-website_files/schedule.yml
-  template: assets/schedule.ejs
+  contents: schedule.yml
+  template: schedule.ejs
 ---
 
 This is a Quarto website.
