@@ -1,0 +1,5 @@
+---
+title: "Data Visualization"
+---
+
+Here are some notes on data visualization.
