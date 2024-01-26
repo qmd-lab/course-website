@@ -4,23 +4,25 @@ schedule:
     - display-date: Jan 16
       date: 1/16/24
       topic: Random Variables
+      unit: Probability
       items:
         - type: Notes
           href: 1-probability/1-random-variables/notes.qmd
-          publish: true
+          render: true
         - type: Slides
           href: 1-probability/1-random-variables/slides.qmd
-          publish: true
+          render: true
     - display-date: Jan 18
       date: 1/18/24
       topic: The Binomial Distribution
+      unit: Probability
       items:
         - type: Notes
           href: 1-probability/2-binomial/notes.qmd
-          publish: true
+          render: true
         - type: Slides
           href: 1-probability/2-binomial/slides.qmd
-          publish: true
+          render: true
   resources:
     - '<a href="https://markdownlivepreview.com">Markdown Live Preview</a>'
 - week: 2
@@ -28,17 +30,29 @@ schedule:
     - display-date: Jan 23
       date: 1/23/24
       topic: Conditional Probability
+      unit: Probability
       items:
         - type: Notes
           href: 1-probability/3-conditional-probability/notes.qmd
-          publish: true
+          render: true
         - type: Slides
           href: 1-probability/3-conditional-probability/slides.qmd
-          publish: false
+          render: false
         - type: PS
           href: 1-probability/3-conditional-probability/ps.qmd
-          publish: false
-          
+          render: true
+    - display-date: Jan 25
+      date: 1/25/24
+      topic: Data Visualization
+      unit: Exploratory Data Analysis
+      items:
+        - type: Notes
+          href: 2-eda/1-data-viz/notes.qmd
+          render: false
+        - type: Slides
+          href: 2-eda/1-data-viz/slides.qmd
+          render: false
+
 partial-render:
-  live-as-of: 1/2/24
+  render-as-of: 1/2/24
   timezone: "-07:00" # GMT offset in +/-hh:mm does not adjust for daylight savings
