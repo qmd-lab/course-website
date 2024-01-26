@@ -1,19 +1,25 @@
 project:
   type: website
+  pre-render: prep-website.ts
+  post-render: clean-website.ts
+  
+metadata-files:
+  - sidebar-nav.yml
 
 website:
   sidebar:
+    logo: assets/stat_bear.png
     contents:
       - href: index.qmd
         text: Home
+      - href: syllabus.qmd
+        text: Syllabus
+      - href: office-hours.qmd
+        text: Office Hours
       - href: slides.qmd
         text: Slides
       - href: problem-sets.qmd
         text: Problem Sets
-    
-metadata-files:
-  - assets/quarto-course-website_files/sidebar-nav.yml
-#  - sidebar-nav.yml
 
 format:
   html:
