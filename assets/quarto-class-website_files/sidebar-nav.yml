@@ -1,6 +1,0 @@
-website:
-  sidebar:
-    contents:
-      - 1-probability/1-random-variables/notes.qmd
-      - 1-probability/2-binomial/notes.qmd
-      - 1-probability/3-conditional-probability/notes.qmd

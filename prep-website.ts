@@ -3,7 +3,7 @@ import { parse, stringify } from "https://deno.land/std/encoding/yaml.ts";
 import { join, dirname, basename } from "https://deno.land/std/path/mod.ts";
 
 const configPath = '_config.yml'; // Path to your config YAML file
-const schedulePath = 'assets/quarto-class-website_files/schedule.yml';
+const schedulePath = 'schedule.yml';
 const quartoProfile = Deno.env.get("QUARTO_PROFILE");
 
 
@@ -20,7 +20,7 @@ async function unIgnoreFiles(schedulePath: string) {
         for (const day of week.days) {
             if (day.items) {
                 for (const item of day.items) {
-                    if (item.publish === false) {
+                    if (item.render === false) {
                         const oldPath = item.href;
                         const dir = dirname(oldPath);
                         const filename = basename(oldPath);
@@ -39,13 +39,14 @@ async function unIgnoreFiles(schedulePath: string) {
     }
 }
 
+// If this the script is during a partial-render, remove _ from filenames
 if (quartoProfile == "partial-render") {
   console.log("> Unignoring Files ...");
   await unIgnoreFiles(schedulePath);
 }
 
 // ---------------------------------------- //
-// Make schedule.yml with all publish: true //
+// Make schedule.yml with all render: true //
 // ---------------------------------------- //
 // This step is skipped in a partial-render
 
@@ -60,7 +61,7 @@ async function makeFullSchedule(configPath: string, schedulePath: string) {
                 ...day,
                 items: day.items.map(item => ({
                     ...item,
-                    publish: true // Set publish to true for all items
+                    render: true // Set render to true for all items
                 }))
             }))
         }));
@@ -88,10 +89,9 @@ async function makeListings(schedulePath: string) {
 
     for (const week of schedule) {
         for (const day of week.days) {
-            // Check if 'items' key exists
             if (day.items && Array.isArray(day.items)) {
                 for (const item of day.items) {
-                    if (item.publish) {
+                    if (item.render) {
                         const type = item.type.toLowerCase();
                         if (!typeLists[type]) {
                             typeLists[type] = [];
@@ -117,7 +117,7 @@ await makeListings(schedulePath);
 //           Make Sidebar Nav          //
 // ----------------------------------- //
 
-async function createSidebarNav(schedulePath: string) {
+async function makeSidebarNav(schedulePath: string) {
     const yamlContent = await Deno.readTextFile(schedulePath);
     const schedule = parse(yamlContent) as Array<any>;
 
@@ -126,7 +126,7 @@ async function createSidebarNav(schedulePath: string) {
     schedule.forEach(week => {
         week.days.forEach(day => {
             day.items.forEach(item => {
-                if (item.type === 'Notes' && item.publish) {
+                if (item.type === 'Notes' && item.render) {
                     notesHrefs.push(item.href);
                 }
             });
@@ -145,7 +145,8 @@ async function createSidebarNav(schedulePath: string) {
     await Deno.writeTextFile(sidebarNavPath, stringify(sidebarNav));
 }
 
-await createSidebarNav(schedulePath);
+console.log("> Making extra sidebar nav ...");
+await makeSidebarNav(schedulePath);
 
 
 

@@ -1,17 +1,18 @@
 
 import { parse, stringify } from "https://deno.land/std/encoding/yaml.ts";
 import { join, dirname, basename } from "https://deno.land/std/path/mod.ts";
+import { ensureDir } from "https://deno.land/std/fs/mod.ts";
 
 const configPath = '_config.yml'; // Path to your config YAML file
-const schedulePath = 'assets/quarto-class-website_files/schedule.yml';
+const schedulePath = 'schedule.yml';
 
 
 // -------------------------------- //
 //     Prepare partial schedule     //
 // -------------------------------- //
-// Make schedule.yml where each item defaults to publish: true
+// Make schedule.yml where each item defaults to render: true
 // This is overridden and set to false for items where date > live-as-of date
-// That is overridden by a pre-existing publish value that exists in _config.yml
+// That is overridden by a pre-existing render value that exists in _config.yml
 
 function convertDateToISOFormat(dateStr: string, timezone: string): string {
     const [month, day, year] = dateStr.split('/').map(num => num.padStart(2, '0'));
@@ -21,8 +22,8 @@ function convertDateToISOFormat(dateStr: string, timezone: string): string {
 async function getThresholdDate(configPath: string): Promise<Date> {
     const yamlContent = await Deno.readTextFile(configPath);
     const config = parse(yamlContent) as any;
-    const liveAsOfStr = autoPublish["autopublish"]["live-as-of"];
-    const timezone = autoPublish["autopublish"]["timezone"];
+    const liveAsOfStr = config["partial-render"]["render-as-of"];
+    const timezone = config["partial-render"]["timezone"];
     return new Date(convertDateToISOFormat(liveAsOfStr, timezone));
 }
 
@@ -30,10 +31,10 @@ async function makePartialSchedule(configPath: string, schedulePath: string) {
     const yamlContent = await Deno.readTextFile(configPath);
     let config = parse(yamlContent) as any;
     
-    const liveAsOfStr = config["partial-render"]["live-as-of"];
+    const renderAsOfStr = config["partial-render"]["render-as-of"];
     const timezone = config["partial-render"]["timezone"];
 
-    const thresholdDate = await new Date(convertDateToISOFormat(liveAsOfStr, timezone));
+    const thresholdDate = await new Date(convertDateToISOFormat(renderAsOfStr, timezone));
 
     const schedule = config.schedule.map(week => ({
         ...week,
@@ -41,13 +42,15 @@ async function makePartialSchedule(configPath: string, schedulePath: string) {
             ...day,
             items: day.items ? day.items.map(item => ({
                 ...item,
-                publish: item.hasOwnProperty('publish') ? item.publish :
+                render: item.hasOwnProperty('render') ? item.render :
                          item.hasOwnProperty('date') ? new Date(convertDateToISOFormat(day.date, "+00:00")) < thresholdDate :
                          true
             })) : []
         }))
     }));
-
+    
+    const outputDir = dirname(schedulePath);
+    await ensureDir(outputDir);
     await Deno.writeTextFile(schedulePath, stringify(schedule));
 }
 
@@ -65,7 +68,7 @@ async function ignoreFiles(schedulePath: string) {
         for (const day of week.days) {
             if (day.items) {
                 for (const item of day.items) {
-                    if (item.publish === false) {
+                    if (item.render === false) {
                         const oldPath = item.href;
                         const dir = dirname(oldPath);
                         const filename = basename(oldPath);
@@ -84,7 +87,7 @@ async function ignoreFiles(schedulePath: string) {
     }
 }
 
-console.log(">> Ignoring Files")
+console.log("> Ignoring Files")
 await ignoreFiles(schedulePath);
 
 
@@ -108,5 +111,5 @@ async function runQuartoRender() {
     process.close();
 }
 
-console.log(">> Quarto Render");
+console.log("> Quarto rendering partial site");
 await runQuartoRender();
