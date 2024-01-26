@@ -1,2 +1,7 @@
 /.quarto/
 *.DS_Store
+
+*.Rproj
+.Rproj.user
+_site
+_partial-site
