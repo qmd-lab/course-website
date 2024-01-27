@@ -1,15 +1,16 @@
 ---
 listing:
-  - id: ps-listing
+  - id: PS-listing
     contents: 
-      - ps-contents.yml
+      - PS-contents.yml
     type: table
     categories: false
+page-layout: full
 toc: false
 ---
 
 # Problem Sets
 
-:::{#ps-listing}
+:::{#PS-listing}
 :::
 
