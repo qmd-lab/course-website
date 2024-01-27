@@ -58,7 +58,6 @@ partial-render:
   timezone: "-07:00" # GMT offset in +/-hh:mm does not adjust for daylight savings
   
 adaptive-nav:
-  hybrid: true
   listings:
     - type: Slides
     - type: PS
