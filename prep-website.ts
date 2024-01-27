@@ -28,9 +28,9 @@ async function unIgnoreFiles(schedulePath: string) {
 
                         try {
                             await Deno.rename(newPath, oldPath);
-                            console.log(`Renamed: ${newPath} to ${oldPath}`);
+                            console.log(`  - Renamed: ${newPath} to ${oldPath}`);
                         } catch (error) {
-                            console.error(`Error renaming ${newPath} to ${oldPath}:`, error.message);
+                            console.error(` - Error renaming ${newPath} to ${oldPath}:`, error.message);
                         }
                     }
                 }
@@ -112,41 +112,4 @@ async function makeListings(schedulePath: string) {
 console.log("> Making files for listings ...");
 await makeListings(schedulePath);
 
-
-// ----------------------------------- //
-//           Make Sidebar Nav          //
-// ----------------------------------- //
-
-async function makeSidebarNav(schedulePath: string) {
-    const yamlContent = await Deno.readTextFile(schedulePath);
-    const schedule = parse(yamlContent) as Array<any>;
-
-    let notesHrefs: string[] = [];
-
-    schedule.forEach(week => {
-        week.days.forEach(day => {
-            day.items.forEach(item => {
-                if (item.type === 'Notes' && item.render) {
-                    notesHrefs.push(item.href);
-                }
-            });
-        });
-    });
-
-    const sidebarNav = {
-        website: {
-            sidebar: {
-                contents: notesHrefs
-            }
-        }
-    };
-
-    const sidebarNavPath = join(dirname(schedulePath), 'sidebar-nav.yml');
-    await Deno.writeTextFile(sidebarNavPath, stringify(sidebarNav));
-}
-
-console.log("> Making extra sidebar nav ...");
-await makeSidebarNav(schedulePath);
-
-
-
+console.log("> Rendering documents ...");
