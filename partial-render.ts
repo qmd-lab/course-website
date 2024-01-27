@@ -56,6 +56,57 @@ async function makePartialSchedule(configPath: string, schedulePath: string) {
 
 await makePartialSchedule(configPath, schedulePath);
 
+
+// ---------------------------------------- //
+//  Make sidebar-nav.yml from schedule.yml  //
+// ---------------------------------------- //
+
+async function makeSidebarNav(schedulePath: string, configPath: string) {
+    const scheduleContent = await Deno.readTextFile(schedulePath);
+    const schedule = parse(scheduleContent) as Array<any>;
+
+    const configContent = await Deno.readTextFile(configPath);
+    const config = parse(configContent) as any;
+
+    const sidebarTypes = config['adaptive-nav']['sidebar'];
+    const isHybridMode = config['adaptive-nav']?.hybrid || false;
+
+    let sidebarContents = [];
+
+    sidebarTypes.forEach(sidebarType => {
+        const type = sidebarType.type;
+        let typeHrefs: string[] = [];
+
+        schedule.forEach(week => {
+            week.days.forEach(day => {
+                day.items.forEach(item => {
+                    if (item.type === type && item.render) {
+                        typeHrefs.push(item.href);
+                    }
+                });
+            });
+        });
+
+        if (isHybridMode) {
+            sidebarContents.push({ title: type, contents: typeHrefs });
+        } else {
+            sidebarContents.push({ section: type, contents: typeHrefs });
+        }
+    });
+
+    const sidebarNav = {
+        website: {
+            sidebar: isHybridMode ? sidebarContents : { contents: sidebarContents }
+        }
+    };
+
+    const sidebarNavPath = join(dirname(schedulePath), 'sidebar-nav.yml');
+    await Deno.writeTextFile(sidebarNavPath, stringify(sidebarNav));
+}
+
+await makeSidebarNav(schedulePath, configPath);
+
+
 // -------------------------------- //
 //  Ignore files based on schedule  //
 // -------------------------------- //
@@ -76,9 +127,9 @@ async function ignoreFiles(schedulePath: string) {
 
                         try {
                             await Deno.rename(oldPath, newPath);
-                            console.log(`Renamed: ${oldPath} to ${newPath}`);
+                            console.log(`  - Renamed: ${oldPath} to ${newPath}`);
                         } catch (error) {
-                            console.error(`Error renaming ${oldPath} to ${newPath}:`, error.message);
+                            console.error(`  - Error renaming ${oldPath} to ${newPath}:`, error.message);
                         }
                     }
                 }
