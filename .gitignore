@@ -3,6 +3,8 @@
 
 *.Rproj
 .Rproj.user
+.Rhistory
+
 _site
 _partial-site
-.Rhistory
+_full-site
