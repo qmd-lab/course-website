@@ -63,4 +63,8 @@ adaptive-nav:
     - type: PS
   sidebar:
     - type: Notes
-    - type: Slides
+
+options:
+  debug: false
+  
+  
