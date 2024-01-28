@@ -3,7 +3,7 @@ import { parse, stringify } from "https://deno.land/std/encoding/yaml.ts";
 import { join, dirname, basename } from "https://deno.land/std/path/mod.ts";
 import { ensureDir } from "https://deno.land/std/fs/mod.ts";
 
-const configPath = '_config.yml'; // Path to your config YAML file
+const configPath = '_config.yml';
 const schedulePath = 'schedule.yml';
 
 
@@ -148,9 +148,9 @@ await ignoreFiles(schedulePath);
 
 async function runQuartoRender() {
     const process = Deno.run({
-        cmd: ["quarto", "render", "--profile", "partial-render"],
-        stdout: "inherit", // Pipe the standard output of the command directly to the standard output of the Deno process
-        stderr: "inherit", // Pipe the standard error of the command directly to the standard error of the Deno process
+        cmd: ["quarto", "render", "--profile", "partial-site"],
+        stdout: "inherit",
+        stderr: "inherit",
     });
 
     const { code } = await process.status();
