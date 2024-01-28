@@ -162,5 +162,5 @@ async function runQuartoRender() {
     process.close();
 }
 
-console.log("> Quarto rendering partial site");
+console.log("> Partial render list has been made.");
 await runQuartoRender();
