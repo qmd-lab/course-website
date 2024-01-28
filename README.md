@@ -14,7 +14,7 @@ To do a partial render of the website, run the following command in the project 
 quarto run partial-render.ts
 ```
 
-The partially rendered website can then be found in `_partial-site`. You can modify which documents are rendered for the website (and which show up in the schedule) by changing the `render` field of each item in the "_config.yml" file.
+The partially rendered website can then be found in `_partial-site`. You can modify which documents are rendered for the website (and which show up in the schedule) by changing the `render` field of each item in the `_config.yml` file.
 
 To do a full render of the website (while taking advantage of the adaptive navigation), instead run:
 
@@ -22,7 +22,7 @@ To do a full render of the website (while taking advantage of the adaptive navig
 quarto run full-render.ts
 ```
 
-This will render every qmd found in the project directory and fully populate the schedule. The resulting website can be found in "_full-site".
+This will render every qmd found in the project directory and fully populate the schedule. The resulting website can be found in `_full-site`.
 
 Note that if you run:
  
