@@ -1,5 +1,5 @@
 
-import { parse, stringify } from "https://deno.land/std/encoding/yaml.ts";
+import { parse, stringify } from "https://deno.land/std/yaml/mod.ts";
 import { join, dirname, basename } from "https://deno.land/std/path/mod.ts";
 import { ensureDir } from "https://deno.land/std/fs/mod.ts";
 
@@ -61,8 +61,6 @@ await makePartialSchedule(configPath, schedulePath);
 //   Make this-week.yml from schedule.yml   //
 // ---------------------------------------- //
 
-
-/*
 
 
 
@@ -174,4 +172,3 @@ async function runQuartoRender() {
 console.log("> Partial render list has been made.");
 await runQuartoRender();
 
-*/
