@@ -58,6 +58,15 @@ await makePartialSchedule(configPath, schedulePath);
 
 
 // ---------------------------------------- //
+//   Make this-week.yml from schedule.yml   //
+// ---------------------------------------- //
+
+
+/*
+
+
+
+// ---------------------------------------- //
 //  Make sidebar-nav.yml from schedule.yml  //
 // ---------------------------------------- //
 
@@ -164,3 +173,5 @@ async function runQuartoRender() {
 
 console.log("> Partial render list has been made.");
 await runQuartoRender();
+
+*/
