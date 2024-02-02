@@ -19,10 +19,10 @@ async function makeFullSchedule(configPath: string, schedulePath: string) {
             ...week,
             days: week.days.map(day => ({
                 ...day,
-                items: day.items.map(item => ({
+                items: day.items ? day.items.map(item => ({
                     ...item,
                     render: true // Set render to true for all items
-                }))
+                })) : []
             }))
         }));
 
