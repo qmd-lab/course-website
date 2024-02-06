@@ -17,16 +17,18 @@ export async function makeSchedule(config: any, tempFilesDir: string, renderType
     const renderAsOfStr = config["partial-render"]["render-as-of"];
     const timezone = config["partial-render"]["timezone"];
     const thresholdDate = new Date(convertDateToISOFormat(renderAsOfStr, timezone));
-
+    
     // propagate dates from day to items
     config.schedule.forEach((week: any) => {
         week.days.forEach((day: any) => {
-            day.items.forEach((item: any) => {
-                // If the item does not have a date, use the day's date
-                if (!item.hasOwnProperty('date')) {
-                    item.date = day.date;
-                }
-            });
+            if (day.items && Array.isArray(day.items)) {
+                day.items.forEach((item: any) => {
+                    // If the item does not have a date, use the day's date
+                    if (!item.hasOwnProperty('date')) {
+                        item.date = day.date;
+                    }
+                });
+            }
         });
     });
 
