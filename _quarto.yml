@@ -1,7 +1,7 @@
 project:
   type: website
-  pre-render: prep-website.ts
-  post-render: clean-website.ts
+  pre-render: qc-prep-website.ts
+  post-render: qc-clean-website.ts
   
 metadata-files:
   - adaptive-nav.yml
