@@ -15,9 +15,10 @@ if (quartoProfile == "partial-site") {
 const config = await readYML(configPath);
 
 // pre-render steps
+const schedule = await makeSchedule(config, tempFilesDir, renderType);
+
 if (quartoProfile == "partial-site") {
   await unIgnoreFiles(schedule);
 }
 
-const schedule = await makeSchedule(config, tempFilesDir, renderType);
 await makeListings(schedule, config, tempFilesDir);
