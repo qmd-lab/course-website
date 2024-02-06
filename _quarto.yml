@@ -4,7 +4,7 @@ project:
   post-render: clean-website.ts
   
 metadata-files:
-  - sidebar-nav.yml
+  - adaptive-nav.yml
 
 website:
   sidebar:
