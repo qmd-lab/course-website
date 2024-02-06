@@ -4,7 +4,20 @@ import { join, dirname, basename } from "https://deno.land/std/path/mod.ts";
 import { ensureDir } from "https://deno.land/std/fs/mod.ts";
 
 const configPath = '_config.yml';
-const schedulePath = 'schedule.yml';
+const tempFilesDir = '';
+const renderType = Deno.args[0];
+
+if (renderType !== "partial" && renderType !== "full") {
+    console.error("Error: The first argument must be 'partial' or 'full'.");
+    Deno.exit(1);
+}
+
+console.log("> Beginning ", renderType, " render.")
+const config = await readConfig(configPath);
+const schedule = await makeSchedule(config, tempFilesDir, renderType);
+await makeAdaptiveNav(config, tempFilesDir, schedule);
+// await ignoreFiles(schedule)
+// await runQuartoRender()
 
 
 // -------------------------------- //
@@ -14,47 +27,75 @@ const schedulePath = 'schedule.yml';
 // This is overridden and set to false for items where date > live-as-of date
 // That is overridden by a pre-existing render value that exists in _config.yml
 
+async function readConfig(configPath: string): Promise<any> {
+    const yamlContent = await Deno.readTextFile(configPath);
+    return parse(yamlContent);
+}
+
 function convertDateToISOFormat(dateStr: string, timezone: string): string {
     const [month, day, year] = dateStr.split('/').map(num => num.padStart(2, '0'));
     return `20${year}-${month}-${day}T00:00:00${timezone}`;
 }
 
-async function getThresholdDate(configPath: string): Promise<Date> {
-    const yamlContent = await Deno.readTextFile(configPath);
-    const config = parse(yamlContent) as any;
-    const liveAsOfStr = config["partial-render"]["render-as-of"];
-    const timezone = config["partial-render"]["timezone"];
-    return new Date(convertDateToISOFormat(liveAsOfStr, timezone));
+function getRenderVal(item: any, renderType: string, thresholdDate: Date, timezone: string): boolean {
+    // default to true
+    let renderValue = true;
+
+    if (renderType === "partial") {
+      
+        const itemDate = new Date(convertDateToISOFormat(item.date, timezone));
+        
+        // override if using render-as-of
+        if (itemDate > thresholdDate) {
+            renderValue = false;
+        }
+
+        // override default and render-as-of if render value specified in config.yml
+        if (item.hasOwnProperty('render')) {
+            renderValue = item.render;
+        }
+    }
+
+    return renderValue;
 }
 
-async function makePartialSchedule(configPath: string, schedulePath: string) {
-    const yamlContent = await Deno.readTextFile(configPath);
-    let config = parse(yamlContent) as any;
+async function makeSchedule(config: any, tempFilesDir: string, renderType: string) {
+    console.log("> Making ", renderType, " schedule...")
     
     const renderAsOfStr = config["partial-render"]["render-as-of"];
     const timezone = config["partial-render"]["timezone"];
+    const thresholdDate = new Date(convertDateToISOFormat(renderAsOfStr, timezone));
 
-    const thresholdDate = await new Date(convertDateToISOFormat(renderAsOfStr, timezone));
+    // propagate dates from day to items
+    config.schedule.forEach((week: any) => {
+        week.days.forEach((day: any) => {
+            day.items.forEach((item: any) => {
+                // If the item does not have a date, use the day's date
+                if (!item.hasOwnProperty('date')) {
+                    item.date = day.date;
+                }
+            });
+        });
+    });
 
+    // set render values for every item
     const schedule = config.schedule.map(week => ({
         ...week,
         days: week.days.map(day => ({
             ...day,
             items: day.items ? day.items.map(item => ({
                 ...item,
-                render: item.hasOwnProperty('render') ? item.render :
-                         item.hasOwnProperty('date') ? new Date(convertDateToISOFormat(day.date, "+00:00")) < thresholdDate :
-                         true
+                render: getRenderVal(item, renderType, thresholdDate, timezone)
             })) : []
         }))
     }));
-    
-    const outputDir = dirname(schedulePath);
-    await ensureDir(outputDir);
-    await Deno.writeTextFile(schedulePath, stringify(schedule));
-}
 
-await makePartialSchedule(configPath, schedulePath);
+    const scheduleFilePath = join(Deno.cwd(), tempFilesDir, "schedule.yml");
+    await Deno.mkdir(tempFilesDir, { recursive: true });
+    await Deno.writeTextFile(scheduleFilePath, stringify(schedule));
+    
+    return schedule;
+}
 
 
 // ---------------------------------------- //
@@ -65,63 +106,88 @@ await makePartialSchedule(configPath, schedulePath);
 
 
 // ---------------------------------------- //
-//  Make sidebar-nav.yml from schedule.yml  //
+//  Make adaptive-nav.yml from schedule.yml  //
 // ---------------------------------------- //
 
-async function makeSidebarNav(schedulePath: string, configPath: string) {
-    const scheduleContent = await Deno.readTextFile(schedulePath);
-    const schedule = parse(scheduleContent) as Array<any>;
+async function makeAdaptiveNav(config: any, tempFilesDir: string, schedule: any) {
+    
+    if (!config.hasOwnProperty('adaptive-nav')) {
+        return; 
+    }
+    
+    if (config['adaptive-nav'].hasOwnProperty('sidebar') && 
+        config['adaptive-nav'].hasOwnProperty('hybrid-sidebar')) {
+      console.error("'adaptive-nav' can have either 'sidebar' or 'hybrid-sidebar', not both.")
+      return;
+    }
+    
+    console.log("> Making adaptive nav...")
+    let adaptiveNav = { website: {} };
+    
+    // to do - add navbar and hybrid-navbar
+    
+    // sidebar nav
+    if (config['adaptive-nav'].hasOwnProperty('sidebar')) {
+        let sidebarContents = [];
+        const sidebarTypes = config['adaptive-nav']['sidebar'];
+        
+        sidebarTypes.forEach(sidebarType => {
+            const type = sidebarType.type;
+            let typeHrefs: string[] = [];
 
-    const configContent = await Deno.readTextFile(configPath);
-    const config = parse(configContent) as any;
-
-    const sidebarTypes = config['adaptive-nav']['sidebar'];
-    const isHybridMode = config['adaptive-nav']?.hybrid || false;
-
-    let sidebarContents = [];
-
-    sidebarTypes.forEach(sidebarType => {
-        const type = sidebarType.type;
-        let typeHrefs: string[] = [];
-
-        schedule.forEach(week => {
-            week.days.forEach(day => {
-                day.items.forEach(item => {
-                    if (item.type === type && item.render) {
-                        typeHrefs.push(item.href);
-                    }
+            schedule.forEach(week => {
+               week.days.forEach(day => {
+                    day.items.forEach(item => {
+                        if (item.type === type && item.render) {
+                            typeHrefs.push(item.href);
+                        }
+                    });
                 });
             });
-        });
-
-        if (isHybridMode) {
-            sidebarContents.push({ title: type, contents: typeHrefs });
-        } else {
+            
             sidebarContents.push({ section: type, contents: typeHrefs });
-        }
-    });
+        });
+    
+        adaptiveNav.website.sidebar = { contents: sidebarContents };
+    }
+    
+    // hybrid-sidebar nav
+    if (config['adaptive-nav'].hasOwnProperty('hybrid-sidebar')) {
+        let sidebarContents = [];
+        const sidebarTypes = config['adaptive-nav']['hybrid-sidebar'];
+        
+        sidebarTypes.forEach(sidebarType => {
+            const type = sidebarType.type;
+            let typeHrefs: string[] = [];
 
-    const sidebarNav = {
-        website: {
-            sidebar: isHybridMode ? sidebarContents : { contents: sidebarContents }
-        }
-    };
-
-    const sidebarNavPath = join(dirname(schedulePath), 'sidebar-nav.yml');
-    await Deno.writeTextFile(sidebarNavPath, stringify(sidebarNav));
+            schedule.forEach(week => {
+               week.days.forEach(day => {
+                    day.items.forEach(item => {
+                        if (item.type === type && item.render) {
+                            typeHrefs.push(item.href);
+                        }
+                    });
+                });
+            });
+            
+            sidebarContents.push({ title: type, contents: typeHrefs });
+        });
+    
+        adaptiveNav.website.sidebar = sidebarContents;
+    }
+    
+    const adaptiveNavPath = join(Deno.cwd(), tempFilesDir, "adaptive-nav.yml");
+    await Deno.writeTextFile(adaptiveNavPath, stringify(adaptiveNav));
 }
-
-await makeSidebarNav(schedulePath, configPath);
 
 
 // -------------------------------- //
 //  Ignore files based on schedule  //
 // -------------------------------- //
 
-async function ignoreFiles(schedulePath: string) {
-    const yamlContent = await Deno.readTextFile(schedulePath);
-    const schedule = parse(yamlContent) as any;
-
+async function ignoreFiles(schedule: any) {
+    console.log("> Ignoring Files")
+    
     for (const week of schedule) {
         for (const day of week.days) {
             if (day.items) {
@@ -145,15 +211,14 @@ async function ignoreFiles(schedulePath: string) {
     }
 }
 
-console.log("> Ignoring Files")
-await ignoreFiles(schedulePath);
-
 
 // -------------------------------- //
 //       Render partial site        //
 // -------------------------------- //
 
 async function runQuartoRender() {
+    console.log("> Rendering documents...")    
+    
     const process = Deno.run({
         cmd: ["quarto", "render", "--profile", "partial-site"],
         stdout: "inherit",
@@ -168,7 +233,4 @@ async function runQuartoRender() {
 
     process.close();
 }
-
-console.log("> Partial render list has been made.");
-await runQuartoRender();
 
