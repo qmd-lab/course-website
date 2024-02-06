@@ -1,6 +1,6 @@
 
 // import qcw module
-import {readYML, unIgnoreFiles, makeListings } from "./qcw-functions.ts"
+import {readYML, unIgnoreFiles, makeListings } from "./qc-functions.ts"
 
 // set parameters
 const configPath = '_config.yml';

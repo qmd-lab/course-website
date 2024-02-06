@@ -1,6 +1,6 @@
 
 // import qcw module
-import { readYML, removeTempFiles } from "./qcw-functions.ts"
+import { readYML, removeTempFiles } from "./qc-functions.ts"
 
 // set parameters
 const configPath = '_config.yml';

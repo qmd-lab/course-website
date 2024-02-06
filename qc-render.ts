@@ -1,6 +1,6 @@
 
 // import qcw module
-import {readYML, makeSchedule, makeAdaptiveNav, ignoreFiles, runQuartoRender} from "./qcw-functions.ts"
+import {readYML, makeSchedule, makeAdaptiveNav, ignoreFiles, runQuartoRender} from "./qc-functions.ts"
 
 // set parameters
 const configPath = '_config.yml';
