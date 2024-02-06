@@ -342,7 +342,7 @@ export async function makeListings(schedule: any, config: any, tempFilesDir: str
 export async function removeTempFiles(config: any) {
     const listingTypes = config['adaptive-nav']['listings'];
     const filesToRemove: string[] = listingTypes.map((listing: any) => `${listing.type}-contents.yml`);
-    filesToRemove.push('sidebar-nav.yml', 'schedule.yml'); 
+    filesToRemove.push('adaptive-nav.yml', 'schedule.yml'); 
 
     const scriptDir = dirname(new URL(import.meta.url).pathname);
 
