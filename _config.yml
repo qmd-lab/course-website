@@ -61,6 +61,6 @@ adaptive-nav:
   #     landing-page: notes.qmd
 
 options:
-  debug: true
+  debug: false
   
   
