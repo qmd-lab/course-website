@@ -1,5 +1,5 @@
 
-// import qcw module
+// import qc module
 import { readYML, removeTempFiles } from "./qc-functions.ts"
 
 // set parameters
