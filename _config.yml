@@ -46,9 +46,10 @@ schedule:
           href: 2-eda/1-data-viz/slides.qmd
 
 partial-render:
-  render-as-of: 1/20/24
+  render-as-of: "1/20/24"
   timezone: "-07:00" # GMT offset in +/-hh:mm does not adjust for daylight savings
-  this-week: true
+  this-week:
+    starts: "friday, 17:00"    
   
 adaptive-nav:
   listings:
@@ -61,6 +62,6 @@ adaptive-nav:
   #     landing-page: notes.qmd
 
 options:
-  debug: false
+  debug: true
   
   
