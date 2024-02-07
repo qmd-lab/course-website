@@ -66,7 +66,7 @@ function getRenderVal(item: any, renderType: string, thresholdDate: Date, timezo
     // default to true
     let renderValue = true;
 
-    if (renderType === "partial") {
+    if (renderType === "partial-site") {
       
         const itemDate = new Date(convertDateToISOFormat(item.date, timezone));
         
@@ -85,18 +85,73 @@ function getRenderVal(item: any, renderType: string, thresholdDate: Date, timezo
 }
 
 
-// ---------------------------------------- //
-//   Make this-week.yml from schedule.yml   //
-// ---------------------------------------- //
+// ------------------------------------ //
+//   Make this-week.yml from schedule   //
+// ------------------------------------ //
+
+export async function makeThisWeek(config: any, schedule: any) {
+    if (!config['partial-render'].hasOwnProperty('this-week')) {
+        return; 
+    }
+    
+    console.log("> Making this-week.yml file.")
+  
+    const { "render-as-of": renderAsOf, timezone, "this-week": { starts } } = config["partial-render"];
+    const [weekStart, weekEnd] = getWeekWindow(renderAsOf, starts, timezone);
+    console.log(`  - Searching for the first week with a date between ${weekStart} and ${weekEnd}`);
+
+    let selectedWeek = schedule.find((week: any) => week.days.some((day: any) => {
+        const dayDate = new Date(day.date + timezone);
+        return dayDate >= weekStart && dayDate < weekEnd;
+    }));
+
+    // If no week matches, use an empty array in that case.
+    if (!selectedWeek) {
+        selectedWeek = [];
+        console.log('. - No matching week was found. Using a blank this-week.yml.')
+    } else {
+        console.log('  - Using week', selectedWeek.week)
+    }
+
+    const filePath = join(Deno.cwd(), "this-week.yml");
+    await Deno.writeTextFile(filePath, stringify(selectedWeek));
+    console.log(`Written to ${filePath}`);
+}
+
+// utilities
+function getWeekWindow(renderAsOf: string, thisWeekStarts: string, timezone: string): [Date, Date] {
+    const renderAsOfDate = new Date(renderAsOf + timezone);
+    const [weekday, time] = thisWeekStarts.split(', ');
+    const [hours, minutes] = time.split(':').map(Number);
+
+    // Adjust to the most recent such weekday and time
+    let weekStart = new Date(renderAsOfDate);
+    weekStart.setHours(hours, minutes, 0, 0);
+
+    // Adjust the weekStart to the previous instance of the specified weekday
+    while (weekStart.getDay() !== ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"].indexOf(weekday.toLowerCase())) {
+        weekStart.setDate(weekStart.getDate() - 1);
+    }
+
+    // Ensure weekStart is before or equal to renderAsOfDate
+    if (weekStart > renderAsOfDate) {
+        weekStart.setDate(weekStart.getDate() - 7);
+    }
+
+    // Create weekEnd one week after weekStart
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+
+    return [weekStart, weekEnd];
+}
 
 
 
+// ------------------------------------- //
+//  Make adaptive-nav.yml from schedule  //
+// ------------------------------------- //
 
-// ---------------------------------------- //
-//  Make adaptive-nav.yml from schedule.yml  //
-// ---------------------------------------- //
-
-export async function makeAdaptiveNav(config: any, tempFilesDir: string, schedule: any) {
+export async function makeAdaptiveNav(config: any, schedule: any, tempFilesDir: string) {
     
     if (!config.hasOwnProperty('adaptive-nav')) {
         return; 
@@ -171,56 +226,37 @@ export async function makeAdaptiveNav(config: any, tempFilesDir: string, schedul
 // -------------------------------- //
 //  Ignore files based on schedule  //
 // -------------------------------- //
+// files are ignored by prepending their filename with _
+// when set to unIgnore = true, will remove starting _
 
-export async function ignoreFiles(schedule: any) {
-    console.log("> Ignoring Files")
+export async function ignoreFiles(schedule: any, unIgnore: boolean = false) {
+    
+    if (!unIgnore) {
+      console.log("> Unignoring Files")
+    } else {
+      console.log("> Ignoring Files")
+    }
     
     for (const week of schedule) {
         for (const day of week.days) {
             if (day.items) {
                 for (const item of day.items) {
                     if (item.render === false) {
-                        const oldPath = item.href;
+                        let oldPath = item.href;
                         const dir = dirname(oldPath);
                         const filename = basename(oldPath);
-                        const newPath = join(dir, `_${filename}`);
-
+                        let newPath = join(dir, `_${filename}`);
+                        
+                        if (unIgnore) {
+                          oldPath = newPath
+                          newPath = item.href
+                        }
+                        
                         try {
                             await Deno.rename(oldPath, newPath);
                             console.log(`  - Renamed: ${oldPath} to ${newPath}`);
                         } catch (error) {
                             console.error(`  - Error renaming ${oldPath} to ${newPath}:`, error.message);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-// -------------------------------- //
-//       Clean up file names        //
-// -------------------------------- //
-// If this the script is during a partial-render, remove _ from filenames
-
-export async function unIgnoreFiles(schedule: any) {
-    console.log("> Unignoring Files ...");
-
-    for (const week of schedule) {
-        for (const day of week.days) {
-            if (day.items) {
-                for (const item of day.items) {
-                    if (item.render === false) {
-                        const oldPath = item.href;
-                        const dir = dirname(oldPath);
-                        const filename = basename(oldPath);
-                        const newPath = join(dir, `_${filename}`);
-
-                        try {
-                            await Deno.rename(newPath, oldPath);
-                            console.log(`  - Renamed: ${newPath} to ${oldPath}`);
-                        } catch (error) {
-                            console.error(` - Error renaming ${newPath} to ${oldPath}:`, error.message);
                         }
                     }
                 }
@@ -237,14 +273,8 @@ export async function unIgnoreFiles(schedule: any) {
 export async function runQuartoRender(renderType) {
     console.log("> Running quarto render ...")    
     
-    let renderProfile = "full-site"
-    
-    if (renderType == "partial") {
-      renderProfile = "partial-site"
-    }
-    
     const process = Deno.run({
-        cmd: ["quarto", "render", "--profile", renderProfile],
+        cmd: ["quarto", "render", "--profile", renderType],
         stdout: "inherit",
         stderr: "inherit",
     });
@@ -296,47 +326,11 @@ export async function makeListings(schedule: any, config: any, tempFilesDir: str
     }
 }
 
-/*
-export async function makeListings(schedule: any, config: any, tempFilesDir: string) {
-  
-    if (!config['adaptive-nav'].hasOwnProperty('listings')) {
-        return; 
-    }
-    
-    console.log("> Making contents files for listings...")
-    
-    const listingTypes = config['adaptive-nav']['listings'].map((listing: any) => listing.type);
-    const typeLists: Record<string, Array<{ path: string }>> = {};
-
-    for (const week of schedule) {
-        for (const day of week.days) {
-            if (day.items && Array.isArray(day.items)) {
-                for (const item of day.items) {
-                    if (item.render && listingTypes.includes(item.type)) {
-                        const type = item.type;
-                        if (!typeLists[type]) {
-                            typeLists[type] = [];
-                        }
-                        typeLists[type].push({ path: item.href });
-                    }
-                }
-            }
-        }
-    }
-
-    for (const [type, items] of Object.entries(typeLists)) {
-        const outputPath = join(tempFilesDir, `${type}-contents.yml`);
-        await Deno.writeTextFile(outputPath, stringify(items));
-        console.log(` - Created file: ${outputPath}`); 
-    }
-}
-*/
-
 
 // ------------------------------------------- //
 //  Remove temp files generated during render  //
 // ------------------------------------------- //
-// This remove all -contents.yml files, schedule.yml, and sidebar-nav.yml
+// This remove all -contents.yml files, schedule.yml, and adaptive-nav.yml
 // Is turned off if options: debug: true
 
 export async function removeTempFiles(config: any) {
