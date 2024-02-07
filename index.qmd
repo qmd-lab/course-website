@@ -1,13 +1,20 @@
 ---
 listing:
-  id: schedule-listing
-  contents: schedule.yml
-  template: schedule.ejs
+  - id: schedule-listing
+    contents: schedule.yml
+    template: schedule.ejs
+  - id: this-week-listing
+    contents: this-week.yml
+    template: this-week.ejs
+toc: false
 ---
 
-This is a Quarto website.
+# Course 101
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+:::{#this-week-listing}
+:::
+
+### Schedule
 
 :::{#schedule-listing}
 :::
