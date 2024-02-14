@@ -1,4 +1,6 @@
 ---
+title: Course 101
+subtitle: My University
 listing:
   - id: schedule-listing
     contents: schedule.yml
@@ -8,8 +10,6 @@ listing:
     template: this-week.ejs
 toc: false
 ---
-
-# Course 101
 
 :::{#this-week-listing}
 :::
