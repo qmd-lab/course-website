@@ -8,6 +8,6 @@ contributes:
       type: website
       pre-render:
         - prepare-cw.ts
-    # metadata-files:
-    #   - draft-list.yml
-    #   - auto-nav.yml
+    metadata-files:
+      - draft-list.yml
+      - auto-nav.yml
