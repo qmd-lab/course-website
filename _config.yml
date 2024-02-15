@@ -1,3 +1,4 @@
+
 schedule:
 - week: 1
   days:
@@ -45,16 +46,17 @@ schedule:
         - type: Slides
           href: 2-eda/1-data-viz/slides.qmd
 
-partial-render:
-  render-as-of: "1/20/24"
+partial-site:
+  draft-after: "1/20/24"
   timezone: "-07:00" # GMT offset in +/-hh:mm does not adjust for daylight savings
   this-week:
     starts: "friday, 17:00"    
   
-adaptive-nav:
-  listings:
+auto-listings:
     - type: Slides
     - type: PS
+    
+auto-nav:
   sidebar:
     - type: Notes
   # hybrid-sidebar:
@@ -63,5 +65,3 @@ adaptive-nav:
 
 options:
   debug: true
-  
-  
