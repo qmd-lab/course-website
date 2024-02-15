@@ -10,6 +10,7 @@ _partial-site
 _full-site
 
 *-contents.yml
-adaptive-nav.yml
+auto-nav.yml
 schedule.yml
 this-week.yml
+draft-list.yml
