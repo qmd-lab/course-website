@@ -49,8 +49,8 @@ schedule:
 partial-site:
   draft-after: "1/20/24"
   timezone: "-07:00" # GMT offset in +/-hh:mm does not adjust for daylight savings
-  this-week:
-    starts: "friday, 17:00"    
+  # this-week:
+  #   starts: "friday, 17:00"    
   
 auto-listings:
     - type: Slides
@@ -62,6 +62,6 @@ auto-nav:
   # hybrid-sidebar:
   #   - type: Notes
   #     landing-page: notes.qmd
+  
+debug: true
 
-options:
-  debug: true
