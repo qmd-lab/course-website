@@ -3,7 +3,7 @@ title: Course 101
 subtitle: My University
 listing:
   - id: schedule-listing
-    contents: schedule.yml
+    contents: cw_files/schedule.yml
     template: '_extensions/qmd-lab/course-website/schedule.ejs'
 toc: false
 ---

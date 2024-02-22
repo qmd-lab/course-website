@@ -2,7 +2,7 @@
 listing:
   - id: PS-listing
     contents: 
-      - PS-contents.yml
+      - cw_files/PS-contents.yml
     type: table
     categories: false
 page-layout: full
