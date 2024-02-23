@@ -10,6 +10,4 @@ contributes:
         - prepare-cw.ts
       post-render:
         - clean-cw.ts
-    metadata-files:
-    - cw_files/draft-list.yml
-    - cw_files/auto-nav.yml
+        
