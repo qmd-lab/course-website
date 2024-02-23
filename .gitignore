@@ -9,8 +9,4 @@ _site
 _partial-site
 _full-site
 
-*-contents.yml
-auto-nav.yml
-schedule.yml
-this-week.yml
-draft-list.yml
+cw_files
