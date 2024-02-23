@@ -8,6 +8,8 @@ contributes:
       type: website
       pre-render:
         - prepare-cw.ts
+      post-render:
+        - clean-cw.ts
     metadata-files:
-      - draft-list.yml
-      - auto-nav.yml
+    - cw_files/draft-list.yml
+    - cw_files/auto-nav.yml
