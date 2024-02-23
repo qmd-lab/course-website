@@ -22,5 +22,5 @@ format:
     toc: true
 
 metadata-files:
-  - cw_files/draft-list.yml
+  - draft-list.yml
   - cw_files/auto-nav.yml
