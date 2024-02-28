@@ -20,3 +20,4 @@ format:
   html:
     theme: [sandstone, assets/styles.scss]
     toc: true
+
