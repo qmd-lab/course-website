@@ -63,3 +63,4 @@ auto-nav:
   #   - type: Notes
   #     landing-page: notes.qmd
 
+debug: true
