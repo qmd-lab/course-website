@@ -21,6 +21,3 @@ format:
     theme: [sandstone, assets/styles.scss]
     toc: true
 
-metadata-files:
-  - draft-list.yml
-  - cw_files/auto-nav.yml
