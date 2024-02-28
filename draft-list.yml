@@ -1,7 +1,0 @@
-website:
-  drafts:
-    - 1-probability/3-conditional-probability/notes.qmd
-    # - 1-probability/3-conditional-probability/slides.qmd
-    - 1-probability/3-conditional-probability/ps.qmd
-    - 2-eda/1-data-viz/notes.qmd
-    # - 2-eda/1-data-viz/slides.qmd
