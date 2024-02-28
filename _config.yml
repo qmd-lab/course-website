@@ -62,6 +62,4 @@ auto-nav:
   # hybrid-sidebar:
   #   - type: Notes
   #     landing-page: notes.qmd
-  
-# debug: true
 
