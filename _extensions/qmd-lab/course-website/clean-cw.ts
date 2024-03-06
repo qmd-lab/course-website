@@ -3,7 +3,7 @@
 import { readYML, removeTempDir } from "./cw-module.ts";
 
 // Set parameters
-const configPath = '_config.yml';
+const configPath = '_quarto.yml';
 const tempFilesDir = './cw_files';
 
 // Run functions
