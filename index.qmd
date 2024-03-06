@@ -8,7 +8,6 @@ listing:
   - id: this-week
     contents: cw_files/this-week.yml
     template: '_extensions/qmd-lab/course-website/this-week.ejs'
-toc: false
 ---
 
 :::{#this-week}
