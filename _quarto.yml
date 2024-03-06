@@ -15,7 +15,72 @@ website:
         text: Slides 
       - href: problem-sets.qmd
         text: Problem Sets
-
+        
+course-website:
+  schedule:
+    - week: 1
+      days:
+        - topic: "Random Variables"
+          display-date: Jan 16
+          date: 1/16/24
+          unit: Probability
+          items:
+          - type: Notes
+            href: 1-probability/1-random-variables/notes.qmd
+          - type: Slides
+            href: 1-probability/1-random-variables/slides.qmd
+            
+        - topic: "The Binomial Distribution"
+          display-date: Jan 18
+          date: 1/18/24
+          items:
+            - type: Notes
+              href: 1-probability/2-binomial/notes.qmd
+            - type: Slides
+              href: 1-probability/2-binomial/slides.qmd
+              
+      resources:
+        - '<a href="https://markdownlivepreview.com">Markdown Live Preview</a>'
+      
+    - week: 2
+      days:
+        - topic: "Conditional Probability"
+          display-date: Jan 23
+          date: 1/23/24
+          items:
+            - type: Notes
+              href: 1-probability/3-conditional-probability/notes.qmd
+            - type: Slides
+              href: 1-probability/3-conditional-probability/slides.qmd
+            - type: PS
+              href: 1-probability/3-conditional-probability/ps.qmd
+              
+        - topic: "Data Visualization"
+          display-date: Jan 25
+          date: 1/25/24
+          items:
+            - type: Notes
+              href: 2-eda/1-data-viz/notes.qmd
+            - type: Slides
+              href: 2-eda/1-data-viz/slides.qmd
+  
+  scheduled-drafts:
+    draft-after: "1/20/24"
+    timezone: "-07:00" # GMT offset in +/-hh:mm does not adjust for daylight savings
+    this-week:
+      starts: "friday, 17:00"
+    
+  auto-listings:
+      - type: Slides
+      - type: PS
+      
+  auto-nav:
+    sidebar:
+      - type: Notes
+    # hybrid-sidebar:
+    #   - type: Notes
+    #     landing-page: notes.qmd
+  
 format:
   html:
     theme: [sandstone, assets/styles.scss]
