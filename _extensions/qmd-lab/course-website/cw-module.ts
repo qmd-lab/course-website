@@ -27,8 +27,8 @@ export async function propagateDates(config: any) {
 }
 
 export async function setDraftVals(config: any) {
-    const draftAfterStr = config["partial-site"]["draft-after"];
-    const timezone = config["partial-site"]["timezone"];
+    const draftAfterStr = config["scheduled-drafts"]["draft-after"];
+    const timezone = config["scheduled-drafts"]["timezone"];
     const thresholdDate = new Date(convertDateToISOFormat(draftAfterStr, timezone));
 
     // set draft values for every item
@@ -86,15 +86,16 @@ async function fileExists(filePath: string): Promise<boolean> {
 // That is overridden by a pre-existing draft value that exists in _config.yml
   
 export async function writeSchedule(config: any, tempFilesDir: string) {
-    console.log("> Making schedule.yml...")
-    const scheduleFilePath = join(Deno.cwd(), tempFilesDir, "schedule.yml");
+    console.log("> Making schedule ...")
+    const outputPath = join(Deno.cwd(), tempFilesDir, "schedule.yml");
     
     await Deno.mkdir(tempFilesDir, { recursive: true });
-    await Deno.writeTextFile(scheduleFilePath, stringify(config.schedule));
+    await Deno.writeTextFile(outputPath, stringify(config.schedule));
+    console.log(`  - Created file: ${outputPath}`);
 }
 
 export async function writeDraftList(config: any, tempFilesDir: string) {
-    console.log("> Making draft-list.yml...")
+    console.log("> Making draft list ...")
     const draftHrefs: string[] = [];
 
     // Iterate through the schedule to find items with draft: true
@@ -114,9 +115,10 @@ export async function writeDraftList(config: any, tempFilesDir: string) {
       }
     };
 
-    const draftListFilePath = join(Deno.cwd(), tempFilesDir, "draft-list.yml");
+    const outputPath = join(Deno.cwd(), tempFilesDir, "draft-list.yml");
     await Deno.mkdir(tempFilesDir, { recursive: true });
-    await Deno.writeTextFile(draftListFilePath, stringify(draftList));
+    await Deno.writeTextFile(outputPath, stringify(draftList));
+    console.log(`  - Created file: ${outputPath}`);
 }
 
 // Utilities
@@ -149,68 +151,6 @@ function getDraftVal(item: any, thresholdDate: Date, timezone: string): boolean 
 }
 
 
-// ------------------------------------ //
-//   Make this-week.yml from schedule   //
-// ------------------------------------ //
-
-export async function makeThisWeek(config: any, schedule: any) {
-    if (!config['partial-render'].hasOwnProperty('this-week')) {
-        return; 
-    }
-    
-    console.log("> Making this-week.yml file.")
-  
-    const { "render-as-of": renderAsOf, timezone, "this-week": { starts } } = config["partial-render"];
-    const [weekStart, weekEnd] = getWeekWindow(renderAsOf, starts, timezone);
-    console.log(`  - Searching for the first week with a date between ${weekStart} and ${weekEnd}`);
-
-    let selectedWeek = schedule.find((week: any) => week.days.some((day: any) => {
-        const dayDate = new Date(day.date + timezone);
-        return dayDate >= weekStart && dayDate < weekEnd;
-    }));
-
-    // If no week matches, use an empty array in that case.
-    if (!selectedWeek) {
-        selectedWeek = [];
-        console.log('. - No matching week was found. Using a blank this-week.yml.')
-    } else {
-        console.log('  - Using week', selectedWeek.week)
-    }
-
-    const filePath = join(Deno.cwd(), "this-week.yml");
-    await Deno.writeTextFile(filePath, stringify(selectedWeek));
-    console.log(`Written to ${filePath}`);
-}
-
-// utilities
-function getWeekWindow(renderAsOf: string, thisWeekStarts: string, timezone: string): [Date, Date] {
-    const renderAsOfDate = new Date(renderAsOf + timezone);
-    const [weekday, time] = thisWeekStarts.split(', ');
-    const [hours, minutes] = time.split(':').map(Number);
-
-    // Adjust to the most recent such weekday and time
-    let weekStart = new Date(renderAsOfDate);
-    weekStart.setHours(hours, minutes, 0, 0);
-
-    // Adjust the weekStart to the previous instance of the specified weekday
-    while (weekStart.getDay() !== ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"].indexOf(weekday.toLowerCase())) {
-        weekStart.setDate(weekStart.getDate() - 1);
-    }
-
-    // Ensure weekStart is before or equal to renderAsOfDate
-    if (weekStart > renderAsOfDate) {
-        weekStart.setDate(weekStart.getDate() - 7);
-    }
-
-    // Create weekEnd one week after weekStart
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 7);
-
-    return [weekStart, weekEnd];
-}
-
-
-
 // ------------------------------------- //
 //  Make auto-nav.yml from schedule  //
 // ------------------------------------- //
@@ -227,7 +167,7 @@ export async function writeAutoNav(config: any, tempFilesDir: string) {
       return;
     }
     
-    console.log("> Making auto nav...")
+    console.log("> Making auto nav file ...")
     let autoNav = { website: {} };
     
     // to do - add navbar and hybrid-navbar
@@ -282,8 +222,9 @@ export async function writeAutoNav(config: any, tempFilesDir: string) {
         autoNav.website.sidebar = sidebarContents;
     }
     
-    const autoNavPath = join(Deno.cwd(), tempFilesDir, "auto-nav.yml");
-    await Deno.writeTextFile(autoNavPath, stringify(autoNav));
+    const outputPath = join(Deno.cwd(), tempFilesDir, "auto-nav.yml");
+    await Deno.writeTextFile(outputPath, stringify(autoNav));
+    console.log(`  - Created file: ${outputPath}`);
 }
 
 
@@ -297,7 +238,7 @@ export async function writeAutoListings(config: any, tempFilesDir: string, offse
         return; 
     }
     
-    console.log("> Making contents files for listings...")
+    console.log("> Making listing contents files ...")
     
     const listingTypes = config['auto-listings'].map((listing: any) => listing.type);
     
@@ -323,8 +264,69 @@ export async function writeAutoListings(config: any, tempFilesDir: string, offse
     for (const [type, items] of Object.entries(typeLists)) {
         const outputPath = join(tempFilesDir, `${type}-contents.yml`);
         await Deno.writeTextFile(outputPath, stringify(items));
-        console.log(` - Created file: ${outputPath}`); 
+        console.log(`  - Created file: ${outputPath}`); 
     }
+}
+
+
+// ---------------------------------- //
+//   Make this-week.yml from config   //
+// ---------------------------------- //
+
+export async function writeThisWeek(config: any, tempFilesDir) {
+    if (!config['scheduled-drafts'].hasOwnProperty('this-week')) {
+        return; 
+    }
+    
+    console.log("> Making this week file...")
+  
+    const { "draft-after": renderAsOf, timezone, "this-week": { starts } } = config["scheduled-drafts"];
+    const [weekStart, weekEnd] = getWeekWindow(renderAsOf, starts, timezone);
+    console.log(`  - Searching for the first week with a date between ${weekStart} and ${weekEnd}`);
+
+    let selectedWeek = config.schedule.find((week: any) => week.days.some((day: any) => {
+        const dayDate = new Date(day.date + timezone);
+        return dayDate >= weekStart && dayDate < weekEnd;
+    }));
+
+    // If no week matches, use an empty array
+    if (!selectedWeek) {
+        selectedWeek = [];
+        console.log('  - No matching week was found. Using a blank this-week.yml.')
+    } else {
+        console.log('  - Using week', selectedWeek.week)
+    }
+
+    const outputPath = join(tempFilesDir, 'this-week.yml');
+    await Deno.writeTextFile(outputPath, stringify(selectedWeek));
+    console.log(`  - Created file: ${outputPath}`);
+}
+
+// utilities
+function getWeekWindow(renderAsOf: string, thisWeekStarts: string, timezone: string): [Date, Date] {
+    const renderAsOfDate = new Date(renderAsOf + timezone);
+    const [weekday, time] = thisWeekStarts.split(', ');
+    const [hours, minutes] = time.split(':').map(Number);
+
+    // Adjust to the most recent such weekday and time
+    let weekStart = new Date(renderAsOfDate);
+    weekStart.setHours(hours, minutes, 0, 0);
+
+    // Adjust the weekStart to the previous instance of the specified weekday
+    while (weekStart.getDay() !== ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"].indexOf(weekday.toLowerCase())) {
+        weekStart.setDate(weekStart.getDate() - 1);
+    }
+
+    // Ensure weekStart is before or equal to renderAsOfDate
+    if (weekStart > renderAsOfDate) {
+        weekStart.setDate(weekStart.getDate() - 7);
+    }
+
+    // Create weekEnd one week after weekStart
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+
+    return [weekStart, weekEnd];
 }
 
 
