@@ -4,20 +4,11 @@ import { ensureDir } from "https://deno.land/std/fs/mod.ts";
 import { parse, stringify } from "https://deno.land/std/yaml/mod.ts";
 import { join, dirname, basename } from "https://deno.land/std/path/mod.ts";
 
-// -------------------------------- //
-//     Prepare partial schedule     //
-// -------------------------------- //
-// Make schedule.yml where each item defaults to render: true
-// This is overridden and set to false for items where date > live-as-of date
-// That is overridden by a pre-existing render value that exists in _config.yml
+// ---------------------------- //
+//     Function definitions     //
+// ---------------------------- //
 
-export async function makeSchedule(config: any, tempFilesDir: string, renderType: string) {
-    console.log("> Making ", renderType, " schedule...")
-    
-    const renderAsOfStr = config["partial-render"]["render-as-of"];
-    const timezone = config["partial-render"]["timezone"];
-    const thresholdDate = new Date(convertDateToISOFormat(renderAsOfStr, timezone));
-    
+export async function propagateDates(config: any) {
     // propagate dates from day to items
     config.schedule.forEach((week: any) => {
         week.days.forEach((day: any) => {
@@ -31,24 +22,101 @@ export async function makeSchedule(config: any, tempFilesDir: string, renderType
             }
         });
     });
+  
+  return config;
+}
 
-    // set render values for every item
-    const schedule = config.schedule.map(week => ({
+export async function setDraftVals(config: any) {
+    const draftAfterStr = config["partial-site"]["draft-after"];
+    const timezone = config["partial-site"]["timezone"];
+    const thresholdDate = new Date(convertDateToISOFormat(draftAfterStr, timezone));
+
+    // set draft values for every item
+    config.schedule = config.schedule.map(week => ({
         ...week,
         days: week.days.map(day => ({
             ...day,
             items: day.items ? day.items.map(item => ({
                 ...item,
-                render: getRenderVal(item, renderType, thresholdDate, timezone)
+                draft: getDraftVal(item, thresholdDate, timezone)
             })) : []
         }))
     }));
-
-    const scheduleFilePath = join(Deno.cwd(), tempFilesDir, "schedule.yml");
-    await Deno.mkdir(tempFilesDir, { recursive: true });
-    await Deno.writeTextFile(scheduleFilePath, stringify(schedule));
     
-    return schedule;
+    return config;
+}
+
+// -------------------------------- //
+//     Clean existing temp files     //
+// -------------------------------- //
+
+/*
+export async function cleanTempDir(config: any, tempFilesDir: string) {
+  const tempExists = fileExists(tempFilesDir);
+  if (!config['no-clean'] && tempExists) {
+    try {
+      await Deno.remove(tempFilesDir, { recursive: true });
+      console.log("cleaned up!")
+    } catch (error) {
+      console.error(`> Error cleaning temporary directory '${tempFilesDir}': ${error}`);
+    }
+  } 
+}
+
+// utilities
+async function fileExists(filePath: string): Promise<boolean> {
+    try {
+        await Deno.stat(filePath);
+        return true;
+    } catch (error) {
+        if (error instanceof Deno.errors.NotFound) {
+            return false;
+        } else {
+            throw error;
+        }
+    }
+}
+*/
+
+// ---------------------------- //
+//     Prepare schedule.yml     //
+// ---------------------------- //
+// Make schedule.yml where each item defaults to draft: false
+// This is overridden and set to true for items where date > live-as-of date
+// That is overridden by a pre-existing draft value that exists in _config.yml
+  
+export async function writeSchedule(config: any, tempFilesDir: string) {
+    console.log("> Making schedule.yml...")
+    const scheduleFilePath = join(Deno.cwd(), tempFilesDir, "schedule.yml");
+    
+    await Deno.mkdir(tempFilesDir, { recursive: true });
+    await Deno.writeTextFile(scheduleFilePath, stringify(config.schedule));
+}
+
+export async function writeDraftList(config: any, tempFilesDir: string) {
+    console.log("> Making draft-list.yml...")
+    const draftHrefs: string[] = [];
+
+    // Iterate through the schedule to find items with draft: true
+    config.schedule.forEach((week: any) => {
+      week.days.forEach((day: any) => {
+        day.items?.forEach((item: any) => {
+          if (item.draft) {
+           draftHrefs.push(item.href);
+          }
+        });
+      });
+    });
+    
+    const draftList = {
+      website: {
+        drafts: draftHrefs
+      }
+    };
+
+    const draftListFilePath = join(Deno.cwd(), tempFilesDir, "draft-list.yml");
+    await Deno.mkdir(tempFilesDir, { recursive: true });
+    await Deno.writeTextFile(draftListFilePath, stringify(draftList));
 }
 
 // Utilities
@@ -62,26 +130,22 @@ function convertDateToISOFormat(dateStr: string, timezone: string): string {
     return `20${year}-${month}-${day}T00:00:00${timezone}`;
 }
 
-function getRenderVal(item: any, renderType: string, thresholdDate: Date, timezone: string): boolean {
-    // default to true
-    let renderValue = true;
-
-    if (renderType === "partial-site") {
-      
-        const itemDate = new Date(convertDateToISOFormat(item.date, timezone));
+function getDraftVal(item: any, thresholdDate: Date, timezone: string): boolean {
+    // default to false
+    let draftValue = false;
+    const itemDate = new Date(convertDateToISOFormat(item.date, timezone));
         
-        // override if using render-as-of
-        if (itemDate > thresholdDate) {
-            renderValue = false;
-        }
-
-        // override default and render-as-of if render value specified in config.yml
-        if (item.hasOwnProperty('render')) {
-            renderValue = item.render;
-        }
+    // override if using draft-after
+    if (itemDate > thresholdDate) {
+        draftValue = true;
     }
 
-    return renderValue;
+    // override default and draft-after if draft value specified in config.yml
+    if (item.hasOwnProperty('draft')) {
+        draftValue = item.draft;
+    }
+
+    return draftValue;
 }
 
 
@@ -148,39 +212,39 @@ function getWeekWindow(renderAsOf: string, thisWeekStarts: string, timezone: str
 
 
 // ------------------------------------- //
-//  Make adaptive-nav.yml from schedule  //
+//  Make auto-nav.yml from schedule  //
 // ------------------------------------- //
 
-export async function makeAdaptiveNav(config: any, schedule: any, tempFilesDir: string) {
+export async function writeAutoNav(config: any, tempFilesDir: string) {
     
-    if (!config.hasOwnProperty('adaptive-nav')) {
+    if (!config.hasOwnProperty('auto-nav')) {
         return; 
     }
     
-    if (config['adaptive-nav'].hasOwnProperty('sidebar') && 
-        config['adaptive-nav'].hasOwnProperty('hybrid-sidebar')) {
-      console.error("'adaptive-nav' can have either 'sidebar' or 'hybrid-sidebar', not both.")
+    if (config['auto-nav'].hasOwnProperty('sidebar') && 
+        config['auto-nav'].hasOwnProperty('hybrid-sidebar')) {
+      console.error("'auto-nav' can have either 'sidebar' or 'hybrid-sidebar', not both.")
       return;
     }
     
-    console.log("> Making adaptive nav...")
-    let adaptiveNav = { website: {} };
+    console.log("> Making auto nav...")
+    let autoNav = { website: {} };
     
     // to do - add navbar and hybrid-navbar
     
     // sidebar nav
-    if (config['adaptive-nav'].hasOwnProperty('sidebar')) {
+    if (config['auto-nav'].hasOwnProperty('sidebar')) {
         let sidebarContents = [];
-        const sidebarTypes = config['adaptive-nav']['sidebar'];
+        const sidebarTypes = config['auto-nav']['sidebar'];
         
         sidebarTypes.forEach(sidebarType => {
             const type = sidebarType.type;
             let typeHrefs: string[] = [];
 
-            schedule.forEach(week => {
+            config.schedule.forEach(week => {
                week.days.forEach(day => {
                     day.items.forEach(item => {
-                        if (item.type === type && item.render) {
+                        if (item.type === type) {
                             typeHrefs.push(item.href);
                         }
                     });
@@ -190,22 +254,22 @@ export async function makeAdaptiveNav(config: any, schedule: any, tempFilesDir: 
             sidebarContents.push({ section: type, contents: typeHrefs });
         });
     
-        adaptiveNav.website.sidebar = { contents: sidebarContents };
+        autoNav.website.sidebar = { contents: sidebarContents };
     }
     
     // hybrid-sidebar nav
-    if (config['adaptive-nav'].hasOwnProperty('hybrid-sidebar')) {
+    if (config['auto-nav'].hasOwnProperty('hybrid-sidebar')) {
         let sidebarContents = [];
-        const sidebarTypes = config['adaptive-nav']['hybrid-sidebar'];
+        const sidebarTypes = config['auto-nav']['hybrid-sidebar'];
         
         sidebarTypes.forEach(sidebarType => {
             const type = sidebarType.type;
             let typeHrefs: string[] = [];
 
-            schedule.forEach(week => {
+            config.schedule.forEach(week => {
                week.days.forEach(day => {
                     day.items.forEach(item => {
-                        if (item.type === type && item.render) {
+                        if (item.type === type) {
                             typeHrefs.push(item.href);
                         }
                     });
@@ -215,77 +279,11 @@ export async function makeAdaptiveNav(config: any, schedule: any, tempFilesDir: 
             sidebarContents.push({ title: type, contents: typeHrefs });
         });
     
-        adaptiveNav.website.sidebar = sidebarContents;
+        autoNav.website.sidebar = sidebarContents;
     }
     
-    const adaptiveNavPath = join(Deno.cwd(), tempFilesDir, "adaptive-nav.yml");
-    await Deno.writeTextFile(adaptiveNavPath, stringify(adaptiveNav));
-}
-
-
-// -------------------------------- //
-//  Ignore files based on schedule  //
-// -------------------------------- //
-// files are ignored by prepending their filename with _
-// when set to unIgnore = true, will remove starting _
-
-export async function ignoreFiles(schedule: any, unIgnore: boolean = false) {
-    
-    if (!unIgnore) {
-      console.log("> Unignoring Files")
-    } else {
-      console.log("> Ignoring Files")
-    }
-    
-    for (const week of schedule) {
-        for (const day of week.days) {
-            if (day.items) {
-                for (const item of day.items) {
-                    if (item.render === false) {
-                        let oldPath = item.href;
-                        const dir = dirname(oldPath);
-                        const filename = basename(oldPath);
-                        let newPath = join(dir, `_${filename}`);
-                        
-                        if (unIgnore) {
-                          oldPath = newPath
-                          newPath = item.href
-                        }
-                        
-                        try {
-                            await Deno.rename(oldPath, newPath);
-                            console.log(`  - Renamed: ${oldPath} to ${newPath}`);
-                        } catch (error) {
-                            console.error(`  - Error renaming ${oldPath} to ${newPath}:`, error.message);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-// -------------------------------- //
-//         Render site profile         //
-// -------------------------------- //
-
-export async function runQuartoRender(renderType) {
-    console.log("> Running quarto render ...")    
-    
-    const process = Deno.run({
-        cmd: ["quarto", "render", "--profile", renderType],
-        stdout: "inherit",
-        stderr: "inherit",
-    });
-
-    const { code } = await process.status();
-
-    if (code !== 0) {
-        console.error('Error: Quarto render process exited with code', code);
-    }
-
-    process.close();
+    const autoNavPath = join(Deno.cwd(), tempFilesDir, "auto-nav.yml");
+    await Deno.writeTextFile(autoNavPath, stringify(autoNav));
 }
 
 
@@ -293,26 +291,29 @@ export async function runQuartoRender(renderType) {
 //           Make Listings          //
 // -------------------------------- //
 
-export async function makeListings(schedule: any, config: any, tempFilesDir: string) {
-    if (!config['adaptive-nav'].hasOwnProperty('listings')) {
+export async function writeAutoListings(config: any, tempFilesDir: string, offset: string ) {
+  
+    if (!config.hasOwnProperty('auto-listings')) {
         return; 
     }
     
     console.log("> Making contents files for listings...")
     
-    const listingTypes = config['adaptive-nav']['listings'].map((listing: any) => listing.type);
+    const listingTypes = config['auto-listings'].map((listing: any) => listing.type);
+    
     // Initialize typeLists with an entry for each listing type
     const typeLists: Record<string, Array<{ path: string }>> = listingTypes.reduce((acc, type) => {
         acc[type] = [];
         return acc;
     }, {});
 
-    for (const week of schedule) {
+
+    for (const week of config.schedule) {
         for (const day of week.days) {
             if (day.items && Array.isArray(day.items)) {
                 for (const item of day.items) {
-                    if (listingTypes.includes(item.type) && item.render) {
-                        typeLists[item.type].push({ path: item.href });
+                    if (listingTypes.includes(item.type)) {
+                        typeLists[item.type].push({ path: join(offset, item.href) });
                     }
                 }
             }
@@ -330,23 +331,19 @@ export async function makeListings(schedule: any, config: any, tempFilesDir: str
 // ------------------------------------------- //
 //  Remove temp files generated during render  //
 // ------------------------------------------- //
-// This remove all -contents.yml files, schedule.yml, and adaptive-nav.yml
-// Is turned off if options: debug: true
+// This removes all -contents.yml files, schedule.yml, and auto-nav.yml
+// Turned off if debug: true exists in config file.
 
-export async function removeTempFiles(config: any) {
-    const listingTypes = config['adaptive-nav']['listings'];
-    const filesToRemove: string[] = listingTypes.map((listing: any) => `${listing.type}-contents.yml`);
-    filesToRemove.push('adaptive-nav.yml', 'schedule.yml'); 
-
-    const scriptDir = dirname(new URL(import.meta.url).pathname);
-
-    for (const file of filesToRemove) {
-        const filePath = join(scriptDir, file);
-        try {
-            await Deno.remove(filePath);
-            console.log(`  - Removed file: ${filePath}`);
-        } catch (error) {
-            console.error(`  - Error removing file ${filePath}:`, error.message);
-        }
+export async function removeTempDir(config: any, tempFilesDir: string) {
+  
+  if (!config.debug) {
+    try {
+      await Deno.remove(tempFilesDir, { recursive: true });
+      console.log(`> Temporary directory '${tempFilesDir}' has been removed.`);
+    } catch (error) {
+      console.error(`> Error removing temporary directory '${tempFilesDir}': ${error}`);
     }
+  } else {
+    console.log(`> Debug mode is on. Temporary files can be viewed in '${tempFilesDir}'.`)
+  }
 }

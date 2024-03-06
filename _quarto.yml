@@ -1,10 +1,5 @@
 project:
-  type: website
-  pre-render: qc-prep-website.ts
-  post-render: qc-clean-website.ts
-  
-metadata-files:
-  - adaptive-nav.yml
+  type: course-website
 
 website:
   sidebar:
@@ -17,7 +12,7 @@ website:
       - href: office-hours.qmd
         text: Office Hours
       - href: slides.qmd
-        text: Slides
+        text: Slides 
       - href: problem-sets.qmd
         text: Problem Sets
 
@@ -25,3 +20,4 @@ format:
   html:
     theme: [sandstone, assets/styles.scss]
     toc: true
+

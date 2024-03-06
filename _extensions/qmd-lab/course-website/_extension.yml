@@ -1,0 +1,15 @@
+title: Quarto Course Website
+author: Andrew Bray
+version: 0.7.0
+quarto-version: ">=1.5.0"
+contributes:
+  project:
+    project:
+      type: website
+      pre-render:
+        - prepare-cw.ts
+      post-render:
+        - clean-cw.ts
+    metadata-files:
+      - cw_files/draft-list.yml
+      - cw_files/auto-nav.yml

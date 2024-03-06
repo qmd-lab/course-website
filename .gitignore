@@ -9,7 +9,4 @@ _site
 _partial-site
 _full-site
 
-*-contents.yml
-adaptive-nav.yml
-schedule.yml
-this-week.yml
+cw_files
