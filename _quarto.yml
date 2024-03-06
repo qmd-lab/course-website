@@ -17,6 +17,20 @@ website:
         text: Problem Sets
         
 course-website:
+  scheduled-drafts:
+    draft-after: "1/20/24"
+    timezone: "-07:00" # GMT offset in +/-hh:mm does not adjust for daylight savings
+    this-week:
+      starts: "friday, 17:00"
+  auto-nav:
+    listings:
+      - type: Slides
+      - type: PS
+    sidebar:
+      - type: Notes
+    # hybrid-sidebar:
+    #   - type: Notes
+    #     landing-page: notes.qmd
   schedule:
     - week: 1
       days:
@@ -63,23 +77,6 @@ course-website:
               href: 2-eda/1-data-viz/notes.qmd
             - type: Slides
               href: 2-eda/1-data-viz/slides.qmd
-  
-  scheduled-drafts:
-    draft-after: "1/20/24"
-    timezone: "-07:00" # GMT offset in +/-hh:mm does not adjust for daylight savings
-    this-week:
-      starts: "friday, 17:00"
-    
-  auto-listings:
-      - type: Slides
-      - type: PS
-      
-  auto-nav:
-    sidebar:
-      - type: Notes
-    # hybrid-sidebar:
-    #   - type: Notes
-    #     landing-page: notes.qmd
   
 format:
   html:
