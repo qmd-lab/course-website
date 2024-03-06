@@ -1,0 +1,5 @@
+project:
+  output-dir: "_full-site"
+
+website:
+  draft-mode: visible
