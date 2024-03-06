@@ -46,6 +46,38 @@ export async function setDraftVals(config: any) {
     return config;
 }
 
+// -------------------------------- //
+//     Clean existing temp files     //
+// -------------------------------- //
+
+/*
+export async function cleanTempDir(config: any, tempFilesDir: string) {
+  const tempExists = fileExists(tempFilesDir);
+  if (!config['no-clean'] && tempExists) {
+    try {
+      await Deno.remove(tempFilesDir, { recursive: true });
+      console.log("cleaned up!")
+    } catch (error) {
+      console.error(`> Error cleaning temporary directory '${tempFilesDir}': ${error}`);
+    }
+  } 
+}
+
+// utilities
+async function fileExists(filePath: string): Promise<boolean> {
+    try {
+        await Deno.stat(filePath);
+        return true;
+    } catch (error) {
+        if (error instanceof Deno.errors.NotFound) {
+            return false;
+        } else {
+            throw error;
+        }
+    }
+}
+*/
+
 // ---------------------------- //
 //     Prepare schedule.yml     //
 // ---------------------------- //
@@ -200,7 +232,7 @@ export async function writeAutoNav(config: any, tempFilesDir: string) {
 //           Make Listings          //
 // -------------------------------- //
 
-export async function writeAutoListings(config: any, tempFilesDir: string) {
+export async function writeAutoListings(config: any, tempFilesDir: string, offset: string ) {
   
     if (!config.hasOwnProperty('auto-listings')) {
         return; 
@@ -216,12 +248,13 @@ export async function writeAutoListings(config: any, tempFilesDir: string) {
         return acc;
     }, {});
 
+
     for (const week of config.schedule) {
         for (const day of week.days) {
             if (day.items && Array.isArray(day.items)) {
                 for (const item of day.items) {
                     if (listingTypes.includes(item.type)) {
-                        typeLists[item.type].push({ path: item.href });
+                        typeLists[item.type].push({ path: join(offset, item.href) });
                     }
                 }
             }
