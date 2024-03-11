@@ -27,8 +27,8 @@ export async function propagateDates(config: any) {
 }
 
 export async function setDraftVals(config: any) {
-    const draftAfterStr = config["scheduled-drafts"]["draft-after"];
-    const timezone = config["scheduled-drafts"]["timezone"];
+    const draftAfterStr = config["course-website"]["scheduled-drafts"]["draft-after"];
+    const timezone = config["course-website"]["scheduled-drafts"]["timezone"];
     const thresholdDate = new Date(convertDateToISOFormat(draftAfterStr, timezone));
 
     // set draft values for every item
@@ -161,8 +161,8 @@ export async function writeAutoNav(config: any, tempFilesDir: string) {
         return; 
     }
     
-    if (config['auto-nav'].hasOwnProperty('sidebar') && 
-        config['auto-nav'].hasOwnProperty('hybrid-sidebar')) {
+    if (config['course-website']['auto-nav'].hasOwnProperty('sidebar') && 
+        config['course-website']['auto-nav'].hasOwnProperty('hybrid-sidebar')) {
       console.error("'auto-nav' can have either 'sidebar' or 'hybrid-sidebar', not both.")
       return;
     }
@@ -173,9 +173,9 @@ export async function writeAutoNav(config: any, tempFilesDir: string) {
     // to do - add navbar and hybrid-navbar
     
     // sidebar nav
-    if (config['auto-nav'].hasOwnProperty('sidebar')) {
+    if (config['course-website']['auto-nav'].hasOwnProperty('sidebar')) {
         let sidebarContents = [];
-        const sidebarTypes = config['auto-nav']['sidebar'];
+        const sidebarTypes = config['course-website']['auto-nav']['sidebar'];
         
         sidebarTypes.forEach(sidebarType => {
             const type = sidebarType.type;
@@ -198,9 +198,9 @@ export async function writeAutoNav(config: any, tempFilesDir: string) {
     }
     
     // hybrid-sidebar nav
-    if (config['auto-nav'].hasOwnProperty('hybrid-sidebar')) {
+    if (config['course-website']['auto-nav'].hasOwnProperty('hybrid-sidebar')) {
         let sidebarContents = [];
-        const sidebarTypes = config['auto-nav']['hybrid-sidebar'];
+        const sidebarTypes = config['course-website']['auto-nav']['hybrid-sidebar'];
         
         sidebarTypes.forEach(sidebarType => {
             const type = sidebarType.type;
@@ -234,13 +234,13 @@ export async function writeAutoNav(config: any, tempFilesDir: string) {
 
 export async function writeAutoListings(config: any, tempFilesDir: string, offset: string ) {
   
-    if (!config['course-website'].hasOwnProperty('auto-listings')) {
+    if (!config['course-website']['auto-nav'].hasOwnProperty('listings')) {
         return; 
     }
     
     console.log("> Making listing contents files ...")
     
-    const listingTypes = config['auto-listings'].map((listing: any) => listing.type);
+    const listingTypes = config['course-website']['auto-nav']['listings'].map((listing: any) => listing.type);
     
     // Initialize typeLists with an entry for each listing type
     const typeLists: Record<string, Array<{ path: string }>> = listingTypes.reduce((acc, type) => {
@@ -274,13 +274,13 @@ export async function writeAutoListings(config: any, tempFilesDir: string, offse
 // ---------------------------------- //
 
 export async function writeThisWeek(config: any, tempFilesDir) {
-    if (!config['scheduled-drafts'].hasOwnProperty('this-week')) {
+    if (!config['course-website']['scheduled-drafts'].hasOwnProperty('this-week')) {
         return; 
     }
     
     console.log("> Making this week file...")
   
-    const { "draft-after": renderAsOf, timezone, "this-week": { starts } } = config["scheduled-drafts"];
+    const { "draft-after": renderAsOf, timezone, "this-week": { starts } } = config["course-website"]["scheduled-drafts"];
     const [weekStart, weekEnd] = getWeekWindow(renderAsOf, starts, timezone);
     console.log(`  - Searching for the first week with a date between ${weekStart} and ${weekEnd}`);
 
