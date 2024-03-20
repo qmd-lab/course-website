@@ -18,7 +18,7 @@ website:
         
 course-website:
   scheduled-drafts:
-    draft-after: "1/20/24"
+    draft-after: "system-time" # can also manually set datetime using format "1/20/24"
     timezone: "-07:00" # GMT offset in +/-hh:mm does not adjust for daylight savings
     this-week:
       starts: "friday, 17:00"
@@ -28,9 +28,6 @@ course-website:
       - type: PS
     sidebar:
       - type: Notes
-    # hybrid-sidebar:
-    #   - type: Notes
-    #     landing-page: notes.qmd
   schedule:
     - week: 1
       days:
