@@ -29,8 +29,15 @@ export async function propagateDates(config: any) {
 export async function setDraftVals(config: any) {
     const draftAfterStr = config["course-website"]["scheduled-drafts"]["draft-after"];
     const timezone = config["course-website"]["scheduled-drafts"]["timezone"];
-    const thresholdDate = new Date(convertDateToISOFormat(draftAfterStr, timezone));
-
+    
+    // either use system time or user specified time
+    let thresholdDate = new Date(0);
+    if (draftAfterStr == "system-time") {
+      thresholdDate = new Date();
+    } else {
+      thresholdDate = new Date(convertDateToISOFormat(draftAfterStr, timezone));
+    }
+    
     // set draft values for every item
     config['course-website'].schedule = config['course-website'].schedule.map(week => ({
         ...week,
@@ -280,8 +287,8 @@ export async function writeThisWeek(config: any, tempFilesDir) {
     
     console.log("> Making this week file...")
   
-    const { "draft-after": renderAsOf, timezone, "this-week": { starts } } = config["course-website"]["scheduled-drafts"];
-    const [weekStart, weekEnd] = getWeekWindow(renderAsOf, starts, timezone);
+    const { "draft-after": draftAfter, timezone, "this-week": { starts } } = config["course-website"]["scheduled-drafts"];
+    const [weekStart, weekEnd] = getWeekWindow(draftAfter, starts, timezone);
     console.log(`  - Searching for the first week with a date between ${weekStart} and ${weekEnd}`);
 
     let selectedWeek = config['course-website'].schedule.find((week: any) => week.days.some((day: any) => {
@@ -303,13 +310,20 @@ export async function writeThisWeek(config: any, tempFilesDir) {
 }
 
 // utilities
-function getWeekWindow(renderAsOf: string, thisWeekStarts: string, timezone: string): [Date, Date] {
-    const renderAsOfDate = new Date(renderAsOf + timezone);
+function getWeekWindow(draftAfterStr: string, thisWeekStarts: string, timezone: string): [Date, Date] {
     const [weekday, time] = thisWeekStarts.split(', ');
     const [hours, minutes] = time.split(':').map(Number);
+    
+    // either use system time or user specified time
+    let thresholdDate = new Date(0);
+    if (draftAfterStr == "system-time") {
+      thresholdDate = new Date();
+    } else {
+      thresholdDate = new Date(convertDateToISOFormat(draftAfterStr, timezone));
+    }
 
     // Adjust to the most recent such weekday and time
-    let weekStart = new Date(renderAsOfDate);
+    let weekStart = new Date(thresholdDate);
     weekStart.setHours(hours, minutes, 0, 0);
 
     // Adjust the weekStart to the previous instance of the specified weekday
@@ -318,7 +332,7 @@ function getWeekWindow(renderAsOf: string, thisWeekStarts: string, timezone: str
     }
 
     // Ensure weekStart is before or equal to renderAsOfDate
-    if (weekStart > renderAsOfDate) {
+    if (weekStart > thresholdDate) {
         weekStart.setDate(weekStart.getDate() - 7);
     }
 
