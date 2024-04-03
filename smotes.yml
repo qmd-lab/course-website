@@ -1,0 +1,7 @@
+website:
+  sidebar:
+    contents:
+      - section: Smotes
+        contents:
+          - page 1
+          - page 2

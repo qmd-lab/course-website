@@ -15,8 +15,13 @@ website:
         text: Slides 
       - href: problem-sets.qmd
         text: Problem Sets
+      - section: "Smotes {#contents-smotes}"
+
+metadata-files:
+  - smotes.yml
         
 course-website:
+  debug: true
   scheduled-drafts:
     draft-after: "system-time" # can also manually set datetime using format "1/20/24"
     timezone: "-07:00" # GMT offset in +/-hh:mm does not adjust for daylight savings
