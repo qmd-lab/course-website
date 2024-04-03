@@ -12,7 +12,6 @@ function rm_nav(meta)
         meta["include-before"][1][1].text then
 
         local sidebarhtml = meta["include-before"][1][1].text
-        quarto.log.output(">>>", sidebarhtml)
         local pattern = '<span class=\"menu%-text\">#nav%-.-</span>'
         meta["include-before"][1][1].text = sidebarhtml:gsub(pattern, "")
         return meta
