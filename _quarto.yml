@@ -27,7 +27,14 @@ course-website:
       - type: Slides
       - type: PS
     sidebar:
-      - type: Notes
+      contents:
+        - type: Notes
+    # sidebar:
+    #   - title: "Notes"
+    #     style: "docked"
+    #     background: light
+    #     contents:
+    #       - type: Notes
   schedule:
     - week: 1
       days:
