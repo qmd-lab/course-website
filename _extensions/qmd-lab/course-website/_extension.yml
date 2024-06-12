@@ -6,10 +6,10 @@ contributes:
   project:
     project:
       type: website
-      pre-render:
-        - prepare-cw.ts
-      post-render:
-        - clean-cw.ts
-    metadata-files:
-      - cw_files/draft-list.yml
-      - cw_files/auto-nav.yml
+      # pre-render:
+      #   - "_extensions/qmd-lab/course-website/_extensions/qmd-lab/scheduled-docs/run-scheduled-docs.ts"
+      # post-render:
+      #   - "_extensions/qmd-lab/course-website/_extensions/qmd-lab/scheduled-docs/clean-scheduled-docs.ts"
+    formats:
+      html:
+        toc: true
