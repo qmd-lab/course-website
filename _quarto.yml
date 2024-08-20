@@ -57,15 +57,14 @@ scheduled-docs:
               href: 1-probability/3-conditional-probability/ps.qmd
         - topic: "Data Visualization"
           display-date: Jan 25
-          docs: 1/25/24
-          items:
+          date: 1/25/24
+          docs:
             - type: Notes
               href: 2-eda/1-data-viz/notes.qmd
             - type: Slides
               href: 2-eda/1-data-viz/slides.qmd
-#   
-# format:
-#   html:
-#     theme: [sandstone, assets/styles.scss]
-#     toc: true
+
+format:
+  html:
+    theme: [sandstone, assets/styles.scss]
 
