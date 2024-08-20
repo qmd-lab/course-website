@@ -3,13 +3,6 @@ author: Andrew Bray
 version: 0.7.0
 quarto-version: ">=1.5.0"
 contributes:
-  project:
-    project:
-      type: website
-      # pre-render:
-      #   - "_extensions/qmd-lab/course-website/_extensions/qmd-lab/scheduled-docs/run-scheduled-docs.ts"
-      # post-render:
-      #   - "_extensions/qmd-lab/course-website/_extensions/qmd-lab/scheduled-docs/clean-scheduled-docs.ts"
-    formats:
-      html:
-        toc: true
+  formats:
+    html:
+      toc: true
